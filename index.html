@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Na'Pizz — Speisekarte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0b09;
+    --surface: #161310;
+    --card: #1e1a16;
+    --accent: #e8521a;
+    --gold: #c9933a;
+    --text: #f0ead8;
+    --muted: #7a6e5f;
+    --border: #2a2420;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; overflow-x: hidden; }
+
+  /* ── FLAG BAR ── */
+  .flag-bar { display: flex; height: 6px; }
+  .flag-bar .fg { flex:1; background: #009246; }
+  .flag-bar .fw { flex:1; background: #f5f0e8; }
+  .flag-bar .fr { flex:1; background: #ce2b37; }
+
+  /* ── HERO ── */
+  .hero-inner {
+    position: relative;
+    padding: 32px 24px 28px;
+    text-align: center;
+    background: linear-gradient(180deg, #1c1408 0%, var(--bg) 100%);
+    overflow: hidden;
+  }
+  .hero-inner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 50% at 50% 90%, rgba(232,82,26,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .arch { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; }
+  .arch-line { width: 48px; height: 1px; }
+  .arch-line.l { background: linear-gradient(90deg, transparent, var(--gold)); }
+  .arch-line.r { background: linear-gradient(90deg, var(--gold), transparent); }
+  .arch-diamond { width: 6px; height: 6px; background: var(--gold); transform: rotate(45deg); }
+
+  /* Flag circle */
+  .flag-circle {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: conic-gradient(#009246 0deg 120deg, #f5f0e8 120deg 240deg, #ce2b37 240deg 360deg);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+    box-shadow: 0 0 28px rgba(201,147,58,0.25);
+    position: relative;
+  }
+  .flag-circle .inner {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: #161208;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+  }
+
+  h1.brand {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 12vw, 4.4rem);
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+    background: linear-gradient(140deg, #f5efd8 20%, #c9933a 60%, #e8521a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+  .sub {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.78rem;
+    letter-spacing: 2.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .mini-flag { display: inline-flex; height: 3px; width: 54px; border-radius: 2px; overflow: hidden; margin-bottom: 14px; }
+  .mini-flag span { flex: 1; }
+
+  .hero-meta { display: flex; justify-content: center; gap: 18px; font-size: 0.74rem; color: var(--muted); }
+  .hero-meta span { display: flex; align-items: center; gap: 4px; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 7px; padding: 14px 14px 6px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0; padding: 6px 14px; border-radius: 100px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--muted); font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem; cursor: pointer; transition: all 0.2s;
+  }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
+
+  /* ── SECTIONS ── */
+  .section { display: none; padding: 8px 16px 100px; }
+  .section.visible { display: block; animation: fadeUp 0.3s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+  .sec-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem; font-style: italic;
+    color: var(--gold);
+    margin: 18px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sec-title:first-child { margin-top: 6px; }
+
+  /* ── ITEM ROW ── */
+  .item {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .item:last-child { border-bottom: none; }
+  .item-left { flex: 1; }
+  .item-name {
+    font-size: 0.92rem; font-weight: 500;
+    color: var(--text); margin-bottom: 3px;
+    display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  }
+  .al { font-size: 0.62rem; color: var(--muted); background: rgba(255,255,255,0.05); padding: 1px 5px; border-radius: 4px; }
+  .item-desc { font-size: 0.76rem; color: var(--muted); line-height: 1.45; }
+  .item-note { font-size: 0.7rem; color: var(--gold); font-style: italic; margin-top: 2px; }
+  .item-price { font-size: 0.98rem; font-weight: 500; color: var(--accent); white-space: nowrap; padding-top: 1px; }
+
+  .badge { font-size: 0.62rem; padding: 2px 7px; border-radius: 100px; font-weight: 500; margin-top: 4px; display: inline-block; }
+  .bv { background: rgba(74,180,74,0.12); color: #5cb85c; border: 1px solid rgba(74,180,74,0.25); }
+  .bs { background: rgba(232,82,26,0.15); color: var(--accent); border: 1px solid rgba(232,82,26,0.3); }
+
+  /* ── INFO ── */
+  .info-block { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 12px; }
+  .info-block h3 { font-family: 'Playfair Display', serif; color: var(--gold); margin-bottom: 12px; font-size: 1rem; }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.83rem; gap: 8px; }
+  .info-row:last-child { border-bottom: none; }
+  .day { color: var(--muted); }
+  .time { font-weight: 500; text-align: right; }
+  .closed { color: var(--accent); font-weight: 500; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(13,11,9,0.95);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex; padding: 10px 0 18px; z-index: 100;
+  }
+  .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; color:var(--muted); font-size:0.58rem; transition:color 0.2s; }
+  .nav-item.active { color: var(--accent); }
+  .nav-icon { font-size: 1.25rem; }
+</style>
+</head>
+<body>
+
+<div class="flag-bar"><span class="fg"></span><span class="fw"></span><span class="fr"></span></div>
+<div class="hero-inner">
+  <div class="arch"><div class="arch-line l"></div><div class="arch-diamond"></div><div class="arch-line r"></div></div>
+  <div class="flag-circle"><div class="inner">🍕</div></div>
+  <h1 class="brand">Na'Pizz</h1>
+  <p class="sub">Restaurant · Pizzeria Napoletana</p>
+  <div class="mini-flag"><span style="background:#009246"></span><span style="background:#f5f0e8"></span><span style="background:#ce2b37"></span></div>
+  <div class="hero-meta">
+    <span>📍 Augsburg</span>
+    <span>📞 082147012399</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="show('pizza',this)">🍕 Pizza</button>
+  <button class="tab" onclick="show('salate',this)">🥗 Salate</button>
+  <button class="tab" onclick="show('vorspeisen',this)">🍽 Vorspeisen</button>
+  <button class="tab" onclick="show('pasta',this)">🍝 Pasta</button>
+  <button class="tab" onclick="show('panuozzi',this)">🥖 Panuozzi</button>
+  <button class="tab" onclick="show('nachspeise',this)">🍰 Nachspeise</button>
+  <button class="tab" onclick="show('getraenke',this)">🥤 Getränke</button>
+  <button class="tab" onclick="show('info',this)">ℹ️ Info</button>
+</div>
+
+<!-- ═══ PIZZA ═══ -->
+<div class="section visible" id="pizza">
+  <p class="sec-title">🍕 Pizza</p>
+  <div class="item"><div class="item-left"><div class="item-name">Marinara <span class="al">A</span></div><div class="item-desc">Pizzateig, Tomatensoße, Oregano, Knoblauch</div></div><div class="item-price">7,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Napoletana <span class="al">A,D</span></div><div class="item-desc">Pizzateig, Kapern, Schwarze Oliven, Sardellen, Knoblauch</div></div><div class="item-price">8,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Margherita <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Basilikum</div></div><div class="item-price">8,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Provola e Pepe <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Provola, Pfeffer</div></div><div class="item-price">10,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Funghi <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Champignons</div></div><div class="item-price">9,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Prosciutto <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Vorderschinken 95% Fleisch</div></div><div class="item-price">9,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Salame <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Salami</div></div><div class="item-price">9,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Prosciutto e Funghi <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Vorderschinken 95% Fleisch, Pilze</div></div><div class="item-price">10,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Diavola <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Scharfe Salami</div></div><div class="item-price">12,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Jalapeños <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Scharfe Salami, Jalapeños, Zwiebel</div></div><div class="item-price">13,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Peperoni <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Peperoni</div></div><div class="item-price">9,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Ricciosa <span class="al">A,G</span></div><div class="item-desc">Tomatensoße, Mozzarella, Vorderschinken 95% Fleisch, Champignons, Artischocken, Oliven</div></div><div class="item-price">12,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">4 Stagioni <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Vorderschinken 95% Fleisch, Champignons, Artischocken</div></div><div class="item-price">11,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">4 Formaggi <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella</div></div><div class="item-price">11,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Tonno <span class="al">A,G,D</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Thunfisch, Zwiebel</div></div><div class="item-price">11,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Hawaii <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Vorderschinken 95% Fleisch, Ananas</div></div><div class="item-price">10,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Vegetariana <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Zucchini, Aubergine, Paprika</div><span class="badge bv">🌿 Vegetarisch</span></div><div class="item-price">12,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Calzone <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Salami, Vorderschinken 95% Fleisch, Champignons</div></div><div class="item-price">14,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Marinaio <span class="al">A,G,N</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Miesmuscheln, Knoblauch</div></div><div class="item-price">13,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Na'Pizz… <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Hackfleischbällchen, Aubergine, Ricotta</div><span class="badge bs">⭐ Signature</span></div><div class="item-price">16,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Bocconcino <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Bocconcini Mozzarella, Ricotta, Basilikum</div></div><div class="item-price">14,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Marì <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Parmaschinken, Rucola, Parmesan Flocken</div></div><div class="item-price">14,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Pesto <span class="al">A,G,H</span></div><div class="item-desc">Pizzateig, Pesto, Mozzarella, Kirschtomaten, Bacon</div></div><div class="item-price">14,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Romagnola <span class="al">A,G,H</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Burrata, Mortadella, Pistaziencreme</div></div><div class="item-price">15,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Nerano <span class="al">A,G</span></div><div class="item-desc">Zucchini Creme, Mozzarella, Zucchini, Parmesan Flocken</div></div><div class="item-price">14,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Pugiana <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Aubergine, Parmesan</div></div><div class="item-price">13,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Bufala <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Büffelmozzarella, Basilikum</div><div class="item-note">Je nach Verfügbarkeit, bitte nachfragen</div></div><div class="item-price">14,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Filetto <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Kirschtomaten, Getrocknete Tomaten, Basilikum</div></div><div class="item-price">13,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Rosè <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Tomaten, Oliven, Scharfe Salami</div></div><div class="item-price">13,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Lori <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Kochsahne, Mozzarella, Vorderschinken 95% Fleisch, Mais</div></div><div class="item-price">12,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Wurstel &amp; Patatine <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Mozzarella, Würstchen, Pommes</div></div><div class="item-price">12,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Calzone Napoletano <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Mozzarella, Ricotta, Cicoli, Pfeffer</div><div class="item-note">Je nach Verfügbarkeit, bitte nachfragen</div></div><div class="item-price">13,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Pizza Trüffel <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Trüffelcreme, Mozzarella, Parmaschinken, Parmesan Flocken, Burrata</div></div><div class="item-price">16,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Salsiccia &amp; Friarielli <span class="al">A,G</span></div><div class="item-desc">Salsiccia, Provola</div><div class="item-note">Je nach Verfügbarkeit, bitte nachfragen</div></div><div class="item-price">15,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Fiocco <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Tomatensoße, Provola Mozzarella, Parmesan, crocche, Vorderschinken 95% Fleisch, Kochsahne</div></div><div class="item-price">14,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Sorrento <span class="al">A,G,D</span></div><div class="item-desc">Pizzateig, Provola Mozzarella, Kirschtomaten, Sardellen</div></div><div class="item-price">14,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">BBQ <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Mozzarella, Zwiebel, Hähnchen, Bacon, BBQ Soße</div></div><div class="item-price">15,90 €</div></div>
+</div>
+
+<!-- ═══ SALATE ═══ -->
+<div class="section" id="salate">
+  <p class="sec-title">🥗 Salate</p>
+  <div class="item"><div class="item-left"><div class="item-name">Insalata Mista</div><div class="item-desc">Eisbergsalat, Mais, Zwiebel, Tomaten, Gurken, Rucola</div></div><div class="item-price">8,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Bella Italia <span class="al">G</span></div><div class="item-desc">Eisbergsalat, Kirschtomaten, Getrocknete Tomate, Burrata, Rucola, Parmesan Flocken</div></div><div class="item-price">13,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Sofia <span class="al">G</span></div><div class="item-desc">Kirschtomaten, Bufala, Basilikum</div></div><div class="item-price">13,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Insalata Tonno <span class="al">D</span></div><div class="item-desc">Eisbergsalat, Thunfisch, Karotten, Zwiebel</div></div><div class="item-price">10,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Gurkensalat</div><div class="item-desc">Gurken, Zwiebel</div><span class="badge bv">🌿 Vegetarisch</span></div><div class="item-price">6,00 €</div></div>
+</div>
+
+<!-- ═══ VORSPEISEN ═══ -->
+<div class="section" id="vorspeisen">
+  <p class="sec-title">🍽 Vorspeisen</p>
+  <div class="item"><div class="item-left"><div class="item-name">Bruschetta 4 Stck. <span class="al">A</span></div><div class="item-desc">Brot, Tomaten, Oregano, Knoblauch</div></div><div class="item-price">8,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Parmigiana <span class="al">G</span></div><div class="item-desc">Aubergine, Tomatensoße, Mozzarella, Parmesan</div></div><div class="item-price">10,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Montanara 4 Stck. <span class="al">A,G</span></div><div class="item-desc">Frittierter Pizzateig, Tomatensoße, Mozzarella, Parmesan, Basilikum</div></div><div class="item-price">11,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Insalata di Mare <span class="al">B,D,N,M</span></div><div class="item-desc">Eisbergsalat, Meeresfrüchte, Oktopus, Muscheln</div></div><div class="item-price">16,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Piatto Napoletano <span class="al">A,G</span></div><div class="item-desc">Aufschnitt, Montanara, Parmigiana, Frittura della casa</div></div><div class="item-price">28,00 €</div></div>
+  <p class="sec-title" style="margin-top:20px">🥩 Secondi</p>
+  <div class="item"><div class="item-left"><div class="item-name">Rindersteak</div><div class="item-desc">mit Gemüse des Hauses oder mit Pommes frites</div></div><div class="item-price">28,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Baby Calamari <span class="al">N</span></div><div class="item-desc">Baby Calamari, Gemüse des Hauses oder Pommes Frites</div></div><div class="item-price">24,90 €</div></div>
+</div>
+
+<!-- ═══ PASTA ═══ -->
+<div class="section" id="pasta">
+  <p class="sec-title">🍝 Pasta</p>
+  <div class="item"><div class="item-left"><div class="item-name">Lasagna <span class="al">A,G,I</span></div><div class="item-desc">Lasagna, Tomatensoße, Bechamel Soße, Bolognese, Mozzarella</div></div><div class="item-price">14,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Cannelloni <span class="al">A,G</span></div><div class="item-desc">Cannelloni, Ricotta, Hackfleisch, Tomatensoße, Mozzarella</div></div><div class="item-price">14,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Pasta al Forno <span class="al">A,G,C</span></div><div class="item-desc">Pasta, Bolognese, Hackfleisch Bällchen, Ei, Mozzarella</div></div><div class="item-price">15,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Gnocchi alla Sorrentina <span class="al">A,G</span></div><div class="item-desc">Gnocchi, Tomatensoße, Mozzarella, Basilikum</div></div><div class="item-price">13,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Carbonara <span class="al">A,G,C</span></div><div class="item-desc">Pasta, Ei, Bacon, Parmesan</div></div><div class="item-price">14,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Scoglio <span class="al">A,B,N</span></div><div class="item-desc">Pasta, Garnelen, Venus Muschel, Miesmuschel, Kirschtomaten</div></div><div class="item-price">16,80 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Tortellini Panna e Prosciutto <span class="al">A,G</span></div><div class="item-desc">Gefüllte Tortellini, Kochsahne, Vorderschinken 95% Fleisch</div></div><div class="item-price">14,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Bolognese <span class="al">A,I</span></div><div class="item-desc">Pasta, Hackfleisch, Karotten, Sellerie, Tomatensoße</div></div><div class="item-price">14,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Genovese <span class="al">A,I,G</span></div><div class="item-desc">Pasta, Zwiebel, Schweinefleisch, Karotten, Sellerie, Parmesan, Pfeffer</div></div><div class="item-price">15,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Panna e Salmone <span class="al">A,D,G</span></div><div class="item-desc">Pasta, Kochsahne, Lachs</div></div><div class="item-price">16,00 €</div></div>
+</div>
+
+<!-- ═══ PANUOZZI ═══ -->
+<div class="section" id="panuozzi">
+  <p class="sec-title">🥖 Panuozzi</p>
+  <div class="item"><div class="item-left"><div class="item-name">Panino Na'Pizz… <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Büffelmozzarella, Parmigiana, Hackfleischbällchen</div></div><div class="item-price">16,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Panino Parma <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Trüffelcreme, Parmaschinken, Rucola, Kirschtomaten, Bocconcini Mozzarella, Burrata, Parmesan</div></div><div class="item-price">16,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Zio Peppe <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Provola Mozzarella, Salsiccia, Friarielli</div><div class="item-note">Je nach Verfügbarkeit, bitte nachfragen</div></div><div class="item-price">15,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Montagnola <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Pilz Creme, Rucola, Parmaschinken, Burrata</div></div><div class="item-price">14,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Big Chick Cheddar <span class="al">A,G</span></div><div class="item-desc">Pizzateig, Provola Mozzarella, Cheddar, Zwiebel, Hähnchen, Bacon</div></div><div class="item-price">15,90 €</div></div>
+</div>
+
+<!-- ═══ NACHSPEISE ═══ -->
+<div class="section" id="nachspeise">
+  <p class="sec-title">🍰 Nachspeise</p>
+  <div class="item"><div class="item-left"><div class="item-name">Pizza Nutella <span class="al">A</span></div><div class="item-desc">Pizzateig, Nutella, Puderzucker</div></div><div class="item-price">10,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Tiramisù <span class="al">A,G</span></div><div class="item-desc">Savoiardi, Sahne, Mascarpone, Caffè, Alcohol</div></div><div class="item-price">6,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Bombe 4 Stck. <span class="al">A</span></div><div class="item-desc">Frittierter Teig, Nutella, Puderzucker</div></div><div class="item-price">10,90 €</div></div>
+</div>
+
+<!-- ═══ GETRÄNKE ═══ -->
+<div class="section" id="getraenke">
+  <p class="sec-title">☕ Heißgetränke</p>
+  <div class="item"><div class="item-left"><div class="item-name">Espresso</div></div><div class="item-price">2,20 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Cappuccino</div></div><div class="item-price">3,50 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Schwarz oder Grüner Tee</div></div><div class="item-price">3,00 €</div></div>
+
+  <p class="sec-title" style="margin-top:20px">🥤 Alkoholfreie Getränke</p>
+  <div class="item"><div class="item-left"><div class="item-name">Wasser mit/ohne Sprudel</div><div class="item-desc">0,75 L</div></div><div class="item-price">6,20 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Alaska Apfelschorle</div><div class="item-desc">0,5 L</div></div><div class="item-price">4,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Alaska Johannes Beer Schorle</div><div class="item-desc">0,5 L</div></div><div class="item-price">4,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Coca-Cola / Coca-Cola Zero</div><div class="item-desc">0,33 L</div></div><div class="item-price">3,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Fifty Fifty</div><div class="item-desc">0,5 L</div></div><div class="item-price">4,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Fanta</div><div class="item-desc">0,33 L</div></div><div class="item-price">3,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Alaska Limo</div><div class="item-desc">0,5 L</div></div><div class="item-price">4,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Estathé Zitrone</div><div class="item-desc">0,33 L</div></div><div class="item-price">3,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Estathé Pfirsich</div><div class="item-desc">0,33 L</div></div><div class="item-price">3,90 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Alkoholfreie Helles Marie Hausbrendel</div><div class="item-desc">0,5 L</div></div><div class="item-price">4,00 €</div></div>
+
+  <p class="sec-title" style="margin-top:20px">🍺 Alkoholische Getränke</p>
+  <div class="item"><div class="item-left"><div class="item-name">Exquisit Helles Bier Schwarzbräu</div><div class="item-desc">0,5 L</div></div><div class="item-price">4,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Pils Bier Schwarzbräu</div><div class="item-desc">0,5 L</div></div><div class="item-price">4,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Marie Hausbrendel Weiß Bier</div><div class="item-desc">0,5 L</div></div><div class="item-price">4,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Radler Schwarzbräu</div><div class="item-desc">0,5 L</div></div><div class="item-price">4,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Marie Hausbrendel Helles Bier</div><div class="item-desc">0,5 L</div></div><div class="item-price">4,00 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Aperol Spritz</div></div><div class="item-price">6,30 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Limoncello Spritz</div></div><div class="item-price">6,30 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Weißwein des Hauses</div><div class="item-desc">0,25 L</div></div><div class="item-price">5,80 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Weißwein des Hauses — Flasche</div></div><div class="item-price">19,80 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Rotwein des Hauses</div><div class="item-desc">0,25 L</div></div><div class="item-price">5,80 €</div></div>
+  <div class="item"><div class="item-left"><div class="item-name">Rotwein des Hauses — Flasche</div></div><div class="item-price">19,80 €</div></div>
+</div>
+
+<!-- ═══ INFO ═══ -->
+<div class="section" id="info">
+  <div class="info-block">
+    <h3>⏰ Öffnungszeiten</h3>
+    <div class="info-row"><span class="day">Montag</span><span class="time">17:00 – 22:00 Uhr</span></div>
+    <div class="info-row"><span class="day">Dienstag</span><span class="closed">Ruhetag</span></div>
+    <div class="info-row"><span class="day">Mittwoch</span><span class="time">17:00 – 22:00 Uhr</span></div>
+    <div class="info-row"><span class="day">Donnerstag</span><span class="time">17:00 – 22:00 Uhr</span></div>
+    <div class="info-row"><span class="day">Freitag</span><span class="time">17:00 – 23:00 Uhr</span></div>
+    <div class="info-row"><span class="day">Samstag</span><span class="time">11:30 – 23:00 Uhr</span></div>
+    <div class="info-row"><span class="day">Sonntag</span><span class="time">11:30–14:30 &amp; 16:30–22:00 Uhr</span></div>
+  </div>
+  <div class="info-block">
+    <h3>📍 Kontakt</h3>
+    <div class="info-row"><span class="day">Stadt</span><span class="time">86150 Augsburg, Wertingerstraße 106, Bärenkeller</span></div>
+    <div class="info-row"><span class="day">Telefon</span><span class="time">082147012399</span></div>
+    <div class="info-row"><span class="day">Instagram</span><span class="time"><a href="https://www.instagram.com/na._.pizz/" target="_blank" style="color:var(--accent);text-decoration:none;">@na._.pizz</a></span></div>
+    <div style="margin-top:12px;padding:10px 12px;background:rgba(232,82,26,0.08);border:1px solid rgba(232,82,26,0.2);border-radius:10px;font-size:0.78rem;color:var(--muted);line-height:1.5">
+      ⚠️ Bitte kontaktiert uns <b style="color:var(--accent)">nicht mehr über WhatsApp</b>. Nur noch per Telefon erreichbar. Danke für euer Verständnis!
+    </div>
+  </div>
+  <div class="info-block">
+    <h3>ℹ️ Allergene</h3>
+    <div style="font-size:0.78rem;color:var(--muted);line-height:1.8">
+      <b style="color:var(--text)">A</b> Gluten &nbsp;·&nbsp; <b style="color:var(--text)">B</b> Krebstiere &nbsp;·&nbsp; <b style="color:var(--text)">C</b> Eier &nbsp;·&nbsp; <b style="color:var(--text)">D</b> Fisch<br>
+      <b style="color:var(--text)">G</b> Milch &nbsp;·&nbsp; <b style="color:var(--text)">H</b> Nüsse &nbsp;·&nbsp; <b style="color:var(--text)">I</b> Sellerie &nbsp;·&nbsp; <b style="color:var(--text)">M</b> Weichtiere &nbsp;·&nbsp; <b style="color:var(--text)">N</b> Senf
+      <br><br>Bitte informieren Sie das Personal vor der Bestellung über Allergien.
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-pizza" onclick="show('pizza',null,'nav-pizza')"><span class="nav-icon">🍕</span>Pizza</div>
+  <div class="nav-item" id="nav-salate" onclick="show('salate',null,'nav-salate')"><span class="nav-icon">🥗</span>Salate</div>
+  <div class="nav-item" id="nav-pasta" onclick="show('pasta',null,'nav-pasta')"><span class="nav-icon">🍝</span>Pasta</div>
+  <div class="nav-item" id="nav-getraenke" onclick="show('getraenke',null,'nav-getraenke')"><span class="nav-icon">🥤</span>Getränke</div>
+  <div class="nav-item" id="nav-info" onclick="show('info',null,'nav-info')"><span class="nav-icon">ℹ️</span>Info</div>
+</div>
+
+<script>
+const navMap = { pizza:'nav-pizza', salate:'nav-salate', vorspeisen:'nav-salate', pasta:'nav-pasta', panuozzi:'nav-pasta', nachspeise:'nav-getraenke', getraenke:'nav-getraenke', info:'nav-info' };
+const tabIds = ['pizza','salate','vorspeisen','pasta','panuozzi','nachspeise','getraenke','info'];
+
+function show(id, tabBtn, navId) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.getElementById(id).classList.add('visible');
+  if (tabBtn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tabBtn.classList.add('active');
+  } else {
+    document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', tabIds[i] === id));
+  }
+  const target = navId || navMap[id];
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (target) document.getElementById(target)?.classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
